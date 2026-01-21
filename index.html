@@ -34,23 +34,53 @@
       /* 3D tilt */
       .tilt { transform-style: preserve-3d; will-change: transform; }
 
-      /* Nav underline (active section indicator) */
-      .navwrap { position: relative; }
-      .nav-underline {
-        position: absolute;
-        left: 0;
-        bottom: -10px;
-        height: 2px;
-        width: 0px;
-        border-radius: 999px;
-        background: rgba(255,255,255,0.85);
-        box-shadow: 0 0 22px rgba(99,102,241,0.25);
-        transform: translateX(0px);
-        transition: transform 220ms ease, width 220ms ease, opacity 220ms ease;
-        opacity: 0;
-        pointer-events: none;
+      /* Carousel */
+      .carousel {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(280px, 420px);
+        gap: 16px;
+        overflow-x: auto;
+        padding: 6px 6px 14px;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
       }
-      .navlink.active { color: white; }
+      .carousel::-webkit-scrollbar { display: none; }
+      .snap { scroll-snap-align: start; }
+
+      /* subtle edge fade so it feels premium */
+      .fade-edges {
+        position: relative;
+      }
+      .fade-edges::before,
+      .fade-edges::after {
+        content: "";
+        position: absolute;
+        top: 0; bottom: 0;
+        width: 42px;
+        pointer-events: none;
+        z-index: 5;
+      }
+      .fade-edges::before {
+        left: 0;
+        background: linear-gradient(to right, rgba(9,9,11,1), rgba(9,9,11,0));
+      }
+      .fade-edges::after {
+        right: 0;
+        background: linear-gradient(to left, rgba(9,9,11,1), rgba(9,9,11,0));
+      }
+
+      /* grab cursor feel */
+      .grabby { cursor: grab; }
+      .grabby:active { cursor: grabbing; }
+
+      /* arrow buttons */
+      .arrowbtn {
+        border: 1px solid rgba(255,255,255,0.10);
+        background: rgba(255,255,255,0.05);
+      }
+      .arrowbtn:hover { background: rgba(255,255,255,0.10); }
     </style>
   </head>
 
@@ -60,18 +90,16 @@
     <main class="relative mx-auto max-w-5xl px-6 py-14">
       <!-- Top bar -->
       <header class="flex items-center justify-between">
-        <a href="#top" class="font-semibold tracking-tight">Ashwin Biju</a>
-
-        <nav class="navwrap flex gap-4 text-sm text-zinc-300" aria-label="Primary">
-          <a class="navlink hover:text-white" href="#projects" data-target="projects">Projects</a>
-          <a class="navlink hover:text-white" href="#about" data-target="about">About</a>
-          <a class="navlink hover:text-white" href="#contact" data-target="contact">Contact</a>
-          <span class="nav-underline" id="navUnderline"></span>
+        <a href="#" class="font-semibold tracking-tight">Ashwin Biju</a>
+        <nav class="flex gap-4 text-sm text-zinc-300">
+          <a class="hover:text-white" href="#projects">Projects</a>
+          <a class="hover:text-white" href="#about">About</a>
+          <a class="hover:text-white" href="#contact">Contact</a>
         </nav>
       </header>
 
       <!-- Hero -->
-      <section id="top" class="reveal mt-16">
+      <section class="reveal mt-16">
         <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-300 glass">
           <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
           Building cool things
@@ -124,73 +152,97 @@
         <div class="flex items-end justify-between gap-6">
           <div>
             <h2 class="text-xl font-semibold tracking-tight">Projects</h2>
-            <p class="mt-2 text-zinc-300">A few things I’ve built recently.</p>
+            <p class="mt-2 text-zinc-300">
+              Drag sideways (or use arrows). Snaps card-by-card.
+            </p>
           </div>
-          <a class="hidden sm:inline text-sm text-zinc-300 hover:text-white" href="https://github.com/AshwinBiju22">
-            More on GitHub ↗
-          </a>
+
+          <div class="flex items-center gap-2">
+            <button
+              id="prevBtn"
+              class="arrowbtn rounded-xl px-3 py-2 text-sm text-zinc-200"
+              aria-label="Scroll projects left"
+              type="button"
+            >
+              ←
+            </button>
+            <button
+              id="nextBtn"
+              class="arrowbtn rounded-xl px-3 py-2 text-sm text-zinc-200"
+              aria-label="Scroll projects right"
+              type="button"
+            >
+              →
+            </button>
+
+            <a class="hidden sm:inline text-sm text-zinc-300 hover:text-white ml-2" href="https://github.com/AshwinBiju22">
+              More on GitHub ↗
+            </a>
+          </div>
         </div>
 
-        <div class="mt-8 grid gap-4 sm:grid-cols-2">
-          <article class="tilt spotlight group rounded-2xl border border-white/10 bg-white/5 p-5 glass transition hover:bg-white/10">
-            <div class="flex items-start justify-between gap-4">
-              <div>
-                <h3 class="font-medium">Cocktail Machine</h3>
-                <p class="mt-1 text-sm text-zinc-300">
-                  Encoded using C and Raspberry Pi to create a smart cocktail mixing machine. Won 3rd place in Imperial College Cohort.
-                </p>
+        <div class="fade-edges mt-8">
+          <div id="projectCarousel" class="carousel grabby">
+            <article class="snap tilt spotlight group rounded-2xl border border-white/10 bg-white/5 p-5 glass transition hover:bg-white/10">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <h3 class="font-medium">Cocktail Machine</h3>
+                  <p class="mt-1 text-sm text-zinc-300">
+                    Encoded using C and Raspberry Pi to create a smart cocktail mixing machine. Won 3rd place in Imperial College Cohort.
+                  </p>
+                </div>
+                <span class="shrink-0 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">C</span>
               </div>
-              <span class="shrink-0 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">C</span>
-            </div>
-            <div class="mt-4 flex gap-3 text-sm">
-              <a class="text-white/70 hover:text-white" href="https://github.com/AshwinBiju22/ARM-Cocktail-Machine" target="_blank" rel="noreferrer">Code ↗</a>
-            </div>
-          </article>
+              <div class="mt-4 flex gap-3 text-sm">
+                <a class="text-white/70 hover:text-white" href="https://github.com/AshwinBiju22/ARM-Cocktail-Machine" target="_blank" rel="noreferrer">Code ↗</a>
+              </div>
+            </article>
 
-          <article class="tilt spotlight group rounded-2xl border border-white/10 bg-white/5 p-5 glass transition hover:bg-white/10">
-            <div class="flex items-start justify-between gap-4">
-              <div>
-                <h3 class="font-medium">StudySwift</h3>
-                <p class="mt-1 text-sm text-zinc-300">
-                  A tutoring website built with Python Django for connecting students and tutors. Achieved A* in A-level Coursework.
-                </p>
+            <article class="snap tilt spotlight group rounded-2xl border border-white/10 bg-white/5 p-5 glass transition hover:bg-white/10">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <h3 class="font-medium">StudySwift</h3>
+                  <p class="mt-1 text-sm text-zinc-300">
+                    A tutoring website built with Python Django for connecting students and tutors. Achieved A* in A-level Coursework.
+                  </p>
+                </div>
+                <span class="shrink-0 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">Python</span>
               </div>
-              <span class="shrink-0 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">Python</span>
-            </div>
-            <div class="mt-4 flex gap-3 text-sm">
-              <a class="text-white/70 hover:text-white" href="https://github.com/AshwinBiju22/StudySwift-Tutoring-App" target="_blank" rel="noreferrer">Code ↗</a>
-            </div>
-          </article>
+              <div class="mt-4 flex gap-3 text-sm">
+                <a class="text-white/70 hover:text-white" href="https://github.com/AshwinBiju22/StudySwift-Tutoring-App" target="_blank" rel="noreferrer">Code ↗</a>
+              </div>
+            </article>
 
-          <article class="tilt spotlight group rounded-2xl border border-white/10 bg-white/5 p-5 glass transition hover:bg-white/10">
-            <div class="flex items-start justify-between gap-4">
-              <div>
-                <h3 class="font-medium">Trading Simulator</h3>
-                <p class="mt-1 text-sm text-zinc-300">
-                  A trading simulator built with Python, Postrges and Redis to practice financial strategies and display real-time data.
-                </p>
+            <article class="snap tilt spotlight group rounded-2xl border border-white/10 bg-white/5 p-5 glass transition hover:bg-white/10">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <h3 class="font-medium">Trading Simulator</h3>
+                  <p class="mt-1 text-sm text-zinc-300">
+                    A trading simulator built with Python, Postrges and Redis to practice financial strategies and display real-time data.
+                  </p>
+                </div>
+                <span class="shrink-0 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">Vue</span>
               </div>
-              <span class="shrink-0 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">Vue</span>
-            </div>
-            <div class="mt-4 flex gap-3 text-sm">
-              <a class="text-white/70 hover:text-white" href="https://github.com/AshwinBiju22/Trading-Simulator" target="_blank" rel="noreferrer">Code ↗</a>
-            </div>
-          </article>
+              <div class="mt-4 flex gap-3 text-sm">
+                <a class="text-white/70 hover:text-white" href="https://github.com/AshwinBiju22/Trading-Simulator" target="_blank" rel="noreferrer">Code ↗</a>
+              </div>
+            </article>
 
-          <article class="tilt spotlight group rounded-2xl border border-white/10 bg-white/5 p-5 glass transition hover:bg-white/10">
-            <div class="flex items-start justify-between gap-4">
-              <div>
-                <h3 class="font-medium">Project Four</h3>
-                <p class="mt-1 text-sm text-zinc-300">
-                  Need to do lol.
-                </p>
+            <article class="snap tilt spotlight group rounded-2xl border border-white/10 bg-white/5 p-5 glass transition hover:bg-white/10">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <h3 class="font-medium">Project Four</h3>
+                  <p class="mt-1 text-sm text-zinc-300">
+                    Need to do lol.
+                  </p>
+                </div>
+                <span class="shrink-0 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">API</span>
               </div>
-              <span class="shrink-0 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">API</span>
-            </div>
-            <div class="mt-4 flex gap-3 text-sm">
-              <a class="text-white/70 hover:text-white" href="#" target="_blank" rel="noreferrer">Code ↗</a>
-            </div>
-          </article>
+              <div class="mt-4 flex gap-3 text-sm">
+                <a class="text-white/70 hover:text-white" href="#" target="_blank" rel="noreferrer">Code ↗</a>
+              </div>
+            </article>
+          </div>
         </div>
       </section>
 
@@ -274,65 +326,47 @@
         card.addEventListener("mouseleave", onLeave);
       });
 
-      // ---- Surprise feature: active nav highlight + animated underline ----
-      const nav = document.querySelector(".navwrap");
-      const underline = document.getElementById("navUnderline");
-      const links = Array.from(document.querySelectorAll(".navlink"));
-      const sections = ["projects", "about", "contact"]
-        .map((id) => document.getElementById(id))
-        .filter(Boolean);
+      // ---- Carousel controls + drag-to-scroll ----
+      const carousel = document.getElementById("projectCarousel");
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
 
-      function setActive(id) {
-        links.forEach((a) => a.classList.toggle("active", a.dataset.target === id));
-
-        const active = links.find((a) => a.dataset.target === id);
-        if (!active) {
-          underline.style.opacity = "0";
-          return;
-        }
-
-        const navRect = nav.getBoundingClientRect();
-        const aRect = active.getBoundingClientRect();
-        const x = aRect.left - navRect.left;
-        underline.style.width = `${aRect.width}px`;
-        underline.style.transform = `translateX(${x}px)`;
-        underline.style.opacity = "1";
+      function scrollByCard(dir) {
+        // pick first card width + gap as the step
+        const first = carousel.querySelector(".snap");
+        if (!first) return;
+        const styles = getComputedStyle(carousel);
+        const gap = parseFloat(styles.columnGap || styles.gap || "16") || 16;
+        const step = first.getBoundingClientRect().width + gap;
+        carousel.scrollBy({ left: dir * step, behavior: "smooth" });
       }
 
-      // Observe which section is "current"
-      const navObs = new IntersectionObserver(
-        (entries) => {
-          const visible = entries
-            .filter((e) => e.isIntersecting)
-            .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-          if (visible?.target?.id) setActive(visible.target.id);
-        },
-        { rootMargin: "-20% 0px -65% 0px", threshold: [0.05, 0.12, 0.2, 0.35] }
-      );
-      sections.forEach((s) => navObs.observe(s));
+      prevBtn.addEventListener("click", () => scrollByCard(-1));
+      nextBtn.addEventListener("click", () => scrollByCard(1));
 
-      // Set default on load (projects if scrolled a bit, otherwise hide)
-      const initial = (() => {
-        const y = window.scrollY || 0;
-        if (y < 200) return null;
-        const current = sections.find((s) => {
-          const r = s.getBoundingClientRect();
-          return r.top <= 140 && r.bottom >= 140;
-        });
-        return current?.id || "projects";
-      })();
-      if (initial) setActive(initial);
+      // drag to scroll (mouse)
+      let isDown = false;
+      let startX = 0;
+      let startScrollLeft = 0;
 
-      // Clicking nav moves underline immediately
-      links.forEach((a) => {
-        a.addEventListener("click", () => setActive(a.dataset.target));
+      carousel.addEventListener("mousedown", (e) => {
+        isDown = true;
+        startX = e.pageX;
+        startScrollLeft = carousel.scrollLeft;
       });
 
-      // Keep underline aligned on resize
-      window.addEventListener("resize", () => {
-        const active = links.find((a) => a.classList.contains("active"));
-        if (active) setActive(active.dataset.target);
+      window.addEventListener("mouseup", () => { isDown = false; });
+
+      window.addEventListener("mousemove", (e) => {
+        if (!isDown) return;
+        const dx = e.pageX - startX;
+        carousel.scrollLeft = startScrollLeft - dx;
       });
+
+      // prevent accidental text selection while dragging
+      carousel.addEventListener("dragstart", (e) => e.preventDefault());
+
+      // touch devices already work with native scroll
     </script>
   </body>
 </html>
